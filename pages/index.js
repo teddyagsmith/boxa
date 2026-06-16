@@ -1,584 +1,481 @@
 import { useState } from "react";
 
-const SPORTS = { tennis: "🎾", padel: "🏓", squash: "🟡" };
-
-const MOCK_LEAGUES = [
-  { id: 1, name: "Clapham Common Tennis", sport: "tennis", location: "Clapham, London", totalPlayers: 24, maxPerBox: 8, boxes: 3, season: "Spring 2026", status: "active", creator: "James W.", description: "Friendly competitive tennis league. Games played at Clapham Common courts. 3 divisions with promotion/relegation." },
-  { id: 2, name: "Stratford Padel Club", sport: "padel", location: "Stratford, London", totalPlayers: 16, maxPerBox: 8, boxes: 2, season: "Spring 2026", status: "active", creator: "Sofia R.", description: "Weekly padel box league. All levels welcome. 2 divisions." },
-  { id: 3, name: "Bristol Squash League", sport: "squash", location: "Clifton, Bristol", totalPlayers: 21, maxPerBox: 7, boxes: 3, season: "Spring 2026", status: "active", creator: "Tom H.", description: "Competitive squash league at Clifton Squash Club." },
-  { id: 4, name: "Hackney Padel Social", sport: "padel", location: "Hackney, London", totalPlayers: 4, maxPerBox: 8, boxes: 1, season: "Spring 2026", status: "open", creator: "Amir K.", description: "Casual padel league, great for beginners. Growing fast!" },
-  { id: 5, name: "Edinburgh Tennis Box", sport: "tennis", location: "Morningside, Edinburgh", totalPlayers: 16, maxPerBox: 8, boxes: 2, season: "Spring 2026", status: "active", creator: "Claire M.", description: "Competitive box league for intermediate+ players." },
+// ── Data ──────────────────────────────────────────────
+const LEAGUES = [
+  { id: 1, name: "Clapham Common Tennis", sport: "tennis", location: "Clapham, London", members: 24, boxes: 3, status: "active", img: "🎾", desc: "Friendly competitive league. 3 divisions with promotion every 6 weeks.", featured: true, starting: false, prize: false },
+  { id: 2, name: "Stratford Padel Club", sport: "padel", location: "Stratford, London", members: 16, boxes: 2, status: "active", img: "🏓", desc: "Weekly padel box league. All levels welcome.", featured: true, starting: false, prize: false },
+  { id: 3, name: "The Bullpadel London League", sport: "padel", location: "Shoreditch, London", members: 32, boxes: 4, status: "active", img: "🏓", desc: "Season winner gets a Bullpadel Vertex racket. Division winners get grip packs, overgrips, and balls.", featured: true, starting: false, prize: true, sponsor: "bullpadel", sponsorColor: "#E8461E", sponsorBg: "#1A1A1A" },
+  { id: 10, name: "Head Pro Series", sport: "padel", location: "Cascais, Lisbon", members: 20, boxes: 3, status: "active", img: "🏓", desc: "Sponsored by Head. Prize pool includes rackets, bags, and apparel for top finishers.", featured: false, starting: false, prize: true, sponsor: "head", sponsorColor: "#FFFFFF", sponsorBg: "#0057A0" },
+  { id: 11, name: "Celebrity Pro League", sport: "padel", location: "Miami, Florida", members: 40, boxes: 5, status: "active", img: "🏓", desc: "The most exclusive padel league. Celebrity players, premium venues, and VIP events. As seen with David Beckham.", featured: true, starting: false, prize: true, sponsor: "celebrity", sponsorColor: "#FFD700", sponsorBg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)" },
+  { id: 12, name: "Tinder Singles League", sport: "padel", location: "London, UK", members: 48, boxes: 6, status: "active", img: "🏓", desc: "Meet your match — on and off the court. Singles-only padel league powered by Tinder. Mix, play, connect.", featured: true, starting: false, prize: true, sponsor: "tinder", sponsorColor: "#FFFFFF", sponsorBg: "linear-gradient(135deg, #FD267A 0%, #FF6036 100%)" },
+  { id: 4, name: "Bristol Squash League", sport: "squash", location: "Clifton, Bristol", members: 21, boxes: 3, status: "active", img: "🟡", desc: "Competitive squash at Clifton Squash Club.", featured: false, starting: false, prize: false },
+  { id: 5, name: "Hackney Padel Social", sport: "padel", location: "Hackney, London", members: 4, boxes: 1, status: "open", img: "🏓", desc: "Casual padel league. Growing fast — join early!", featured: false, starting: true, prize: false },
+  { id: 6, name: "Edinburgh Tennis Box", sport: "tennis", location: "Morningside, Edinburgh", members: 16, boxes: 2, status: "active", img: "🎾", desc: "Competitive box league for intermediate+ players.", featured: false, starting: false, prize: false },
+  { id: 8, name: "NYC Padel League", sport: "padel", location: "Manhattan, New York", members: 28, boxes: 4, status: "active", img: "🏓", desc: "The biggest padel box league in New York.", featured: true, starting: false, prize: false },
+  { id: 9, name: "Wimbledon Social Tennis", sport: "tennis", location: "Wimbledon, London", members: 8, boxes: 1, status: "open", img: "🎾", desc: "New league launching. All abilities. Play at Wimbledon Park courts.", featured: false, starting: true, prize: false },
 ];
 
-const MOCK_BOXES = {
-  1: [
-    {
-      name: "Box A", label: "Division 1",
-      standings: [
-        { rank: 1, name: "You", played: 5, won: 4, lost: 1, setsWon: 9, setsLost: 3, points: 22, zone: null },
-        { rank: 2, name: "James W.", played: 5, won: 4, lost: 1, setsWon: 8, setsLost: 4, points: 21, zone: null },
-        { rank: 3, name: "Sofia R.", played: 4, won: 3, lost: 1, setsWon: 7, setsLost: 3, points: 17, zone: null },
-        { rank: 4, name: "Amir K.", played: 5, won: 3, lost: 2, setsWon: 7, setsLost: 5, points: 18, zone: null },
-        { rank: 5, name: "Tom H.", played: 4, won: 2, lost: 2, setsWon: 5, setsLost: 5, points: 13, zone: null },
-        { rank: 6, name: "Claire M.", played: 4, won: 1, lost: 3, setsWon: 4, setsLost: 7, points: 10, zone: null },
-        { rank: 7, name: "Dan P.", played: 3, won: 1, lost: 2, setsWon: 3, setsLost: 5, points: 8, zone: "relegation" },
-        { rank: 8, name: "Lena G.", played: 4, won: 0, lost: 4, setsWon: 1, setsLost: 9, points: 5, zone: "relegation" },
-      ],
-      players: [
-        { name: "You", phone: "+44 7700 900000", lastActive: "Today", avatar: "TD" },
-        { name: "James W.", phone: "+44 7700 900123", lastActive: "Today", avatar: "JW" },
-        { name: "Sofia R.", phone: "+44 7700 900456", lastActive: "Yesterday", avatar: "SR" },
-        { name: "Amir K.", phone: "+44 7700 900789", lastActive: "2 days ago", avatar: "AK" },
-        { name: "Tom H.", phone: "+44 7700 900321", lastActive: "Today", avatar: "TH" },
-        { name: "Claire M.", phone: "+44 7700 900654", lastActive: "3 days ago", avatar: "CM" },
-        { name: "Dan P.", phone: "+44 7700 900987", lastActive: "1 week ago", avatar: "DP" },
-        { name: "Lena G.", phone: "+44 7700 900147", lastActive: "Yesterday", avatar: "LG" },
-      ],
-      results: [
-        { id: 1, p1: "You", p2: "James W.", score: "6-4, 3-6, [10-7]", winner: "You", date: "Mar 18" },
-        { id: 2, p1: "Sofia R.", p2: "Amir K.", score: "6-2, 6-3", winner: "Sofia R.", date: "Mar 17" },
-        { id: 3, p1: "You", p2: "Tom H.", score: "6-1, 6-4", winner: "You", date: "Mar 15" },
-        { id: 4, p1: "Claire M.", p2: "Lena G.", score: "6-3, 2-6, [10-8]", winner: "Claire M.", date: "Mar 14" },
-      ],
-    },
-    {
-      name: "Box B", label: "Division 2",
-      standings: [
-        { rank: 1, name: "Marcus T.", played: 5, won: 5, lost: 0, setsWon: 10, setsLost: 2, points: 25, zone: "promotion" },
-        { rank: 2, name: "Nina K.", played: 5, won: 4, lost: 1, setsWon: 9, setsLost: 4, points: 22, zone: "promotion" },
-        { rank: 3, name: "Oli B.", played: 4, won: 3, lost: 1, setsWon: 7, setsLost: 3, points: 17, zone: null },
-        { rank: 4, name: "Priya S.", played: 5, won: 2, lost: 3, setsWon: 6, setsLost: 7, points: 15, zone: null },
-        { rank: 5, name: "Ryan F.", played: 4, won: 2, lost: 2, setsWon: 5, setsLost: 5, points: 13, zone: null },
-        { rank: 6, name: "Sarah L.", played: 4, won: 1, lost: 3, setsWon: 4, setsLost: 7, points: 10, zone: null },
-        { rank: 7, name: "Vikram J.", played: 3, won: 1, lost: 2, setsWon: 3, setsLost: 5, points: 8, zone: "relegation" },
-        { rank: 8, name: "Zara M.", played: 4, won: 0, lost: 4, setsWon: 2, setsLost: 9, points: 6, zone: "relegation" },
-      ],
-      players: [
-        { name: "Marcus T.", phone: "+44 7700 901001", lastActive: "Today", avatar: "MT" },
-        { name: "Nina K.", phone: "+44 7700 901002", lastActive: "Today", avatar: "NK" },
-        { name: "Oli B.", phone: "+44 7700 901003", lastActive: "Yesterday", avatar: "OB" },
-        { name: "Priya S.", phone: "+44 7700 901004", lastActive: "3 days ago", avatar: "PS" },
-        { name: "Ryan F.", phone: "+44 7700 901005", lastActive: "Today", avatar: "RF" },
-        { name: "Sarah L.", phone: "+44 7700 901006", lastActive: "2 days ago", avatar: "SL" },
-        { name: "Vikram J.", phone: "+44 7700 901007", lastActive: "5 days ago", avatar: "VJ" },
-        { name: "Zara M.", phone: "+44 7700 901008", lastActive: "Yesterday", avatar: "ZM" },
-      ],
-      results: [
-        { id: 10, p1: "Marcus T.", p2: "Nina K.", score: "7-5, 6-4", winner: "Marcus T.", date: "Mar 19" },
-        { id: 11, p1: "Oli B.", p2: "Priya S.", score: "6-3, 4-6, [10-6]", winner: "Oli B.", date: "Mar 18" },
-        { id: 12, p1: "Ryan F.", p2: "Sarah L.", score: "6-4, 3-6, [10-8]", winner: "Ryan F.", date: "Mar 16" },
-      ],
-    },
-    {
-      name: "Box C", label: "Division 3",
-      standings: [
-        { rank: 1, name: "Alex D.", played: 5, won: 4, lost: 1, setsWon: 9, setsLost: 3, points: 22, zone: "promotion" },
-        { rank: 2, name: "Beth C.", played: 5, won: 4, lost: 1, setsWon: 8, setsLost: 4, points: 21, zone: "promotion" },
-        { rank: 3, name: "Charlie W.", played: 4, won: 3, lost: 1, setsWon: 6, setsLost: 3, points: 16, zone: null },
-        { rank: 4, name: "Diana R.", played: 4, won: 2, lost: 2, setsWon: 5, setsLost: 5, points: 13, zone: null },
-        { rank: 5, name: "Ed S.", played: 3, won: 2, lost: 1, setsWon: 4, setsLost: 3, points: 11, zone: null },
-        { rank: 6, name: "Fiona T.", played: 4, won: 1, lost: 3, setsWon: 3, setsLost: 7, points: 9, zone: null },
-        { rank: 7, name: "George H.", played: 3, won: 0, lost: 3, setsWon: 1, setsLost: 6, points: 4, zone: null },
-        { rank: 8, name: "Holly P.", played: 4, won: 0, lost: 4, setsWon: 0, setsLost: 8, points: 4, zone: null },
-      ],
-      players: [
-        { name: "Alex D.", phone: "+44 7700 902001", lastActive: "Today", avatar: "AD" },
-        { name: "Beth C.", phone: "+44 7700 902002", lastActive: "Yesterday", avatar: "BC" },
-        { name: "Charlie W.", phone: "+44 7700 902003", lastActive: "Today", avatar: "CW" },
-        { name: "Diana R.", phone: "+44 7700 902004", lastActive: "2 days ago", avatar: "DR" },
-        { name: "Ed S.", phone: "+44 7700 902005", lastActive: "Today", avatar: "ES" },
-        { name: "Fiona T.", phone: "+44 7700 902006", lastActive: "4 days ago", avatar: "FT" },
-        { name: "George H.", phone: "+44 7700 902007", lastActive: "1 week ago", avatar: "GH" },
-        { name: "Holly P.", phone: "+44 7700 902008", lastActive: "3 days ago", avatar: "HP" },
-      ],
-      results: [
-        { id: 20, p1: "Alex D.", p2: "Beth C.", score: "7-6, 4-6, [10-5]", winner: "Alex D.", date: "Mar 19" },
-        { id: 21, p1: "Charlie W.", p2: "Diana R.", score: "6-2, 6-4", winner: "Charlie W.", date: "Mar 17" },
-      ],
-    },
-  ],
+const STANDINGS = [
+  { rank: 1, name: "You", p: 5, w: 4, l: 1, sets: 9, pts: 22, zone: null },
+  { rank: 2, name: "James W.", p: 5, w: 4, l: 1, sets: 8, pts: 21, zone: null },
+  { rank: 3, name: "Sofia R.", p: 4, w: 3, l: 1, sets: 7, pts: 17, zone: null },
+  { rank: 4, name: "Amir K.", p: 5, w: 3, l: 2, sets: 7, pts: 18, zone: null },
+  { rank: 5, name: "Tom H.", p: 4, w: 2, l: 2, sets: 5, pts: 13, zone: null },
+  { rank: 6, name: "Claire M.", p: 4, w: 1, l: 3, sets: 4, pts: 10, zone: null },
+  { rank: 7, name: "Dan P.", p: 3, w: 1, l: 2, sets: 3, pts: 8, zone: "releg" },
+  { rank: 8, name: "Lena G.", p: 4, w: 0, l: 4, sets: 1, pts: 5, zone: "releg" },
+];
+
+const PLAYERS = [
+  { name: "James W.", phone: "+44 7700 900123", active: "Today", initials: "JW" },
+  { name: "Sofia R.", phone: "+44 7700 900456", active: "Yesterday", initials: "SR" },
+  { name: "Amir K.", phone: "+44 7700 900789", active: "2d ago", initials: "AK" },
+  { name: "Tom H.", phone: "+44 7700 900321", active: "Today", initials: "TH" },
+  { name: "Claire M.", phone: "+44 7700 900654", active: "3d ago", initials: "CM" },
+  { name: "Dan P.", phone: "+44 7700 900987", active: "1w ago", initials: "DP" },
+  { name: "Lena G.", phone: "+44 7700 900147", active: "Yesterday", initials: "LG" },
+];
+
+const RESULTS = [
+  { p1: "You", p2: "James W.", score: "6-4, 3-6, [10-7]", winner: "You", date: "18 Mar" },
+  { p1: "Sofia R.", p2: "Amir K.", score: "6-2, 6-3", winner: "Sofia R.", date: "17 Mar" },
+  { p1: "You", p2: "Tom H.", score: "6-1, 6-4", winner: "You", date: "15 Mar" },
+  { p1: "Claire M.", p2: "Lena G.", score: "6-3, 2-6, [10-8]", winner: "Claire M.", date: "14 Mar" },
+];
+
+// ── Palette ───────────────────────────────────────────
+const C = {
+  bg: "#F5F1EB", card: "#FFFFFF", cardBorder: "#E8E2D9",
+  primary: "#1A3C34", primaryLight: "#2D5A4E",
+  accent: "#C8E64A", accentSoft: "#E8F5B0",
+  text: "#1A1A1A", textSec: "#6B7280", textDim: "#9CA3AF",
+  tennis: "#16A34A", padel: "#2563EB", squash: "#D97706",
+  promo: "#059669", releg: "#DC2626",
+  whatsapp: "#25D366",
 };
 
-const colors = {
-  bg: "#0B0E11", card: "#141920", cardHover: "#1A2230", border: "#1E2736",
-  accent: "#E8FF47", accentDim: "rgba(232,255,71,0.15)", accentText: "#0B0E11",
-  text: "#E8ECF1", textMuted: "#7A8BA0", textDim: "#4A5568",
-  success: "#34D399", warning: "#FBBF24", danger: "#F87171",
-  promotion: "#34D399", relegation: "#F87171",
-  sport: { tennis: "#4ADE80", padel: "#60A5FA", squash: "#FBBF24" },
-};
+const sportColor = (s) => C[s] || C.padel;
+const sportLabel = { tennis: "Tennis", padel: "Padel", squash: "Squash" };
 
-const font = "'DM Sans', 'Segoe UI', system-ui, sans-serif";
-const fontMono = "'JetBrains Mono', 'SF Mono', monospace";
+// ── App ───────────────────────────────────────────────
+export default function Boxa() {
+  const [screen, setScreen] = useState("home");
+  const [filter, setFilter] = useState("all");
+  const [league, setLeague] = useState(null);
+  const [tab, setTab] = useState("table");
+  const [box, setBox] = useState(0);
+  const [toast, setToast] = useState(null);
+  const [query, setQuery] = useState("");
 
-export default function BoxLeagueApp() {
-  const [screen, setScreen] = useState("browse");
-  const [selectedLeague, setSelectedLeague] = useState(null);
-  const [selectedBoxIdx, setSelectedBoxIdx] = useState(0);
-  const [leagueTab, setLeagueTab] = useState("standings");
-  const [sportFilter, setSportFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showScoreEntry, setShowScoreEntry] = useState(false);
-  const [showCreateLeague, setShowCreateLeague] = useState(false);
-  const [showSubscribe, setShowSubscribe] = useState(false);
-  const [showSeasonInfo, setShowSeasonInfo] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
-  const [notification, setNotification] = useState(null);
+  const show = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2200); };
+  const openLeague = (l) => { setLeague(l); setTab("table"); setBox(0); setScreen("league"); };
+  const filtered = LEAGUES.filter(l => (filter === "all" || l.sport === filter) && (!query || l.name.toLowerCase().includes(query.toLowerCase()) || l.location.toLowerCase().includes(query.toLowerCase())));
 
-  const notify = (msg) => { setNotification(msg); setTimeout(() => setNotification(null), 2500); };
+  // ── Styles ────────────────────────────────────────
+  const fonts = `'Instrument Serif', Georgia, serif`;
+  const bodyFont = `'Inter', 'Segoe UI', system-ui, sans-serif`;
+  const monoFont = `'Space Mono', 'Courier New', monospace`;
 
-  const filteredLeagues = MOCK_LEAGUES.filter((l) => {
-    const matchSport = sportFilter === "all" || l.sport === sportFilter;
-    const matchSearch = !searchQuery || l.name.toLowerCase().includes(searchQuery.toLowerCase()) || l.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchSport && matchSearch;
-  });
+  const base = { background: C.bg, minHeight: "100vh", maxWidth: 480, margin: "0 auto", fontFamily: bodyFont, color: C.text, position: "relative", paddingBottom: 72 };
 
-  const openLeague = (league) => { setSelectedLeague(league); setSelectedBoxIdx(0); setLeagueTab("standings"); setScreen("league"); };
+  // ── Small Components ──────────────────────────────
+  const Pill = ({ active, children, onClick, color }) => (
+    <button onClick={onClick} style={{ padding: "8px 18px", borderRadius: 24, border: active ? "none" : `1.5px solid ${C.cardBorder}`, background: active ? (color || C.primary) : C.card, color: active ? "#fff" : C.textSec, fontFamily: bodyFont, fontSize: 13, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s", boxShadow: active ? `0 2px 8px ${(color || C.primary)}30` : "none" }}>{children}</button>
+  );
 
-  const currentBoxes = selectedLeague ? (MOCK_BOXES[selectedLeague.id] || MOCK_BOXES[1]) : [];
-  const currentBox = currentBoxes[selectedBoxIdx] || currentBoxes[0];
+  const Badge = ({ children, color = C.primary }) => (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, fontFamily: bodyFont, color, background: color + "12", padding: "3px 10px", borderRadius: 20, letterSpacing: "0.02em" }}>{children}</span>
+  );
 
+  const Avatar = ({ initials, size = 36, color = C.primary }) => (
+    <div style={{ width: size, height: size, borderRadius: "50%", background: color + "14", color: color, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: monoFont, fontSize: size * 0.35, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
+  );
+
+  const Section = ({ title, children, action }) => (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 20px", marginBottom: 12 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontFamily: fonts, fontWeight: 400, color: C.text, fontStyle: "italic" }}>{title}</h2>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+
+  // ── Sponsor Logo ───────────────────────────────
+  const SponsorLogo = ({ sponsor }) => {
+    if (sponsor === "bullpadel") return (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="13" fill="#E8461E" /><text x="14" y="18" textAnchor="middle" fill="#fff" fontSize="11" fontWeight="900" fontFamily="Arial">B</text></svg>
+        <span style={{ fontSize: 14, fontWeight: 900, color: "#E8461E", letterSpacing: "0.08em", fontFamily: "'Inter', sans-serif" }}>BULLPADEL</span>
+      </div>
+    );
+    if (sponsor === "head") return (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <svg width="28" height="28" viewBox="0 0 28 28"><rect x="1" y="1" width="26" height="26" rx="4" fill="#0057A0" /><text x="14" y="19" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="900" fontFamily="Arial">HEAD</text></svg>
+        <span style={{ fontSize: 14, fontWeight: 900, color: "#fff", letterSpacing: "0.1em", fontFamily: "'Inter', sans-serif" }}>HEAD PRO SERIES</span>
+      </div>
+    );
+    if (sponsor === "celebrity") return (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 24 }}>⭐</span>
+        <span style={{ fontSize: 15, fontWeight: 900, color: "#FFD700", letterSpacing: "0.06em", fontFamily: "'Inter', sans-serif" }}>CELEBRITY PRO LEAGUE</span>
+      </div>
+    );
+    if (sponsor === "tinder") return (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 3c-1 4-4 6-5 10-1 4 1.5 8 5 10 3.5-2 6-6 5-10-1-4-4-6-5-10z" fill="#fff"/></svg>
+        <span style={{ fontSize: 15, fontWeight: 900, color: "#fff", letterSpacing: "0.04em", fontFamily: "'Inter', sans-serif" }}>tinder</span>
+        <span style={{ fontSize: 11, color: "#ffffff90", fontWeight: 600 }}>singles league</span>
+      </div>
+    );
+    return null;
+  };
+
+  // ── League Card ───────────────────────────────────
+  const LeagueCard = ({ l, wide }) => {
+    const hasBrand = l.sponsor && l.sponsorBg;
+    return (
+      <div onClick={() => openLeague(l)} style={{ width: wide ? "100%" : 290, flexShrink: 0, background: C.card, borderRadius: 16, border: `1px solid ${C.cardBorder}`, overflow: "hidden", cursor: "pointer", transition: "all 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+        {/* Branded header or color bar */}
+        {hasBrand ? (
+          <div style={{ padding: "14px 16px", background: l.sponsorBg, position: "relative", overflow: "hidden" }}>
+            {l.sponsor === "celebrity" && (
+              <div style={{ position: "absolute", right: -10, top: -10, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,215,0,0.1)", filter: "blur(20px)" }} />
+            )}
+            <SponsorLogo sponsor={l.sponsor} />
+            {l.sponsor === "celebrity" && (
+              <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900, color: "#1a1a2e", fontFamily: "'Inter', sans-serif", border: "2px solid #FFD70060" }}>DB</div>
+                <div style={{ fontSize: 12, color: "#ffffff80", lineHeight: 1.4 }}>
+                  <span style={{ color: "#FFD700", fontWeight: 700 }}>David Beckham</span> and friends.<br />Premium venues. VIP events.
+                </div>
+              </div>
+            )}
+            {l.sponsor === "tinder" && (
+              <div style={{ marginTop: 6, fontSize: 11, color: "#ffffff90" }}>Meet your match — on and off the court 🔥</div>
+            )}
+            {l.sponsor === "bullpadel" && (
+              <div style={{ marginTop: 6, fontSize: 11, color: "#ffffff80" }}>🏆 Season winner gets a Vertex racket</div>
+            )}
+            {l.sponsor === "head" && (
+              <div style={{ marginTop: 6, fontSize: 11, color: "#ffffff80" }}>🏆 Rackets, bags & apparel prize pool</div>
+            )}
+          </div>
+        ) : (
+          <div style={{ height: 4, background: `linear-gradient(90deg, ${sportColor(l.sport)}, ${sportColor(l.sport)}80)` }} />
+        )}
+        <div style={{ padding: "14px 16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 24 }}>{l.img}</span>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: C.text, lineHeight: 1.3 }}>{l.name}</div>
+                <div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>{l.location}</div>
+              </div>
+            </div>
+          </div>
+          {!hasBrand && <p style={{ margin: "6px 0 10px", fontSize: 13, color: C.textSec, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.desc}</p>}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <Badge color={sportColor(l.sport)}>{sportLabel[l.sport]}</Badge>
+            {l.prize && !hasBrand && <Badge color="#B45309">🏆 Prizes</Badge>}
+            {l.status === "open" && <Badge color={C.promo}>Open to join</Badge>}
+            <span style={{ fontSize: 12, color: C.textDim, fontFamily: monoFont, marginLeft: "auto" }}>{l.members} players · {l.boxes} div{l.boxes > 1 ? "s" : ""}</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ── Horizontal Scroll ─────────────────────────────
+  const HScroll = ({ children }) => (
+    <div style={{ display: "flex", gap: 12, overflowX: "auto", padding: "0 20px", scrollbarWidth: "none", msOverflowStyle: "none" }}>{children}</div>
+  );
+
+  // ── Nav ────────────────────────────────────────────
   const Nav = () => (
-    <div style={{ display: "flex", background: colors.card, borderTop: `1px solid ${colors.border}`, position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100, padding: "6px 0 env(safe-area-inset-bottom, 8px)" }}>
-      {[{ id: "browse", icon: "◉", label: "Explore" }, { id: "my-leagues", icon: "⬡", label: "My Leagues" }, { id: "profile", icon: "◐", label: "Profile" }].map((t) => (
-        <button key={t.id} onClick={() => { setScreen(t.id); setSelectedLeague(null); }} style={{ flex: 1, background: "none", border: "none", color: screen === t.id || (screen === "league" && t.id === "my-leagues") ? colors.accent : colors.textMuted, fontFamily: font, fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "6px 0" }}>
-          <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>{t.label}
+    <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: C.card, borderTop: `1px solid ${C.cardBorder}`, display: "flex", padding: "8px 0 env(safe-area-inset-bottom, 10px)", zIndex: 100 }}>
+      {[["home", "◉", "Explore"], ["leagues", "⬡", "My Leagues"], ["profile", "◐", "Profile"]].map(([id, icon, label]) => (
+        <button key={id} onClick={() => { setScreen(id); setLeague(null); }} style={{ flex: 1, background: "none", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "4px 0", cursor: "pointer", color: (screen === id || (screen === "league" && id === "leagues")) ? C.primary : C.textDim, fontFamily: bodyFont, fontSize: 10, fontWeight: 600, transition: "color 0.2s" }}>
+          <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>{label}
         </button>
       ))}
     </div>
   );
 
-  const Header = ({ title, subtitle, back, action }) => (
-    <div style={{ padding: "16px 20px 12px", display: "flex", alignItems: "center", gap: 12 }}>
-      {back && <button onClick={back} style={{ background: "none", border: "none", color: colors.textMuted, fontSize: 22, cursor: "pointer", padding: 0, lineHeight: 1 }}>←</button>}
-      <div style={{ flex: 1 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: colors.text, fontFamily: font, letterSpacing: "-0.02em" }}>{title}</h1>
-        {subtitle && <p style={{ margin: "2px 0 0", fontSize: 13, color: colors.textMuted, fontFamily: font }}>{subtitle}</p>}
-      </div>
-      {action}
-    </div>
-  );
-
-  const Badge = ({ children, color: c = colors.accent }) => (
-    <span style={{ display: "inline-flex", alignItems: "center", fontSize: 11, fontWeight: 700, fontFamily: font, color: c, background: `${c}18`, padding: "3px 8px", borderRadius: 6, letterSpacing: "0.04em", textTransform: "uppercase", whiteSpace: "nowrap" }}>{children}</span>
-  );
-
-  const Card = ({ children, onClick, style: s = {} }) => (
-    <div onClick={onClick} style={{ background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 14, padding: 16, cursor: onClick ? "pointer" : "default", transition: "all 0.15s", ...s }}
-      onMouseEnter={(e) => onClick && (e.currentTarget.style.background = colors.cardHover)}
-      onMouseLeave={(e) => onClick && (e.currentTarget.style.background = colors.card)}>{children}</div>
-  );
-
-  const Button = ({ children, variant = "primary", onClick, style: s = {}, disabled }) => {
-    const styles = {
-      primary: { background: colors.accent, color: colors.accentText, border: "none" },
-      secondary: { background: "transparent", color: colors.accent, border: `1.5px solid ${colors.accent}40` },
-      ghost: { background: "transparent", color: colors.textMuted, border: `1px solid ${colors.border}` },
-      danger: { background: colors.danger + "20", color: colors.danger, border: `1px solid ${colors.danger}30` },
-    };
-    return <button disabled={disabled} onClick={onClick} style={{ padding: "10px 20px", borderRadius: 10, fontFamily: font, fontSize: 14, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.5 : 1, transition: "all 0.15s", ...styles[variant], ...s }}>{children}</button>;
-  };
-
-  const Avatar = ({ initials, sport, size = 38 }) => (
-    <div style={{ width: size, height: size, borderRadius: "50%", background: sport ? colors.sport[sport] + "25" : colors.accentDim, color: sport ? colors.sport[sport] : colors.accent, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: fontMono, fontSize: size * 0.33, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
-  );
-
-  const ZoneIndicator = ({ zone }) => {
-    if (!zone) return null;
-    return <div style={{ width: 4, height: "100%", minHeight: 36, borderRadius: 2, background: zone === "promotion" ? colors.promotion : colors.relegation, position: "absolute", left: 0, top: 0, bottom: 0 }} />;
-  };
-
-  const Modal = ({ title, onClose, children }) => (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: 480, maxHeight: "85vh", background: colors.bg, borderRadius: "20px 20px 0 0", border: `1px solid ${colors.border}`, borderBottom: "none", overflow: "auto" }}>
-        <div style={{ padding: "16px 20px", borderBottom: `1px solid ${colors.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: colors.bg, zIndex: 1 }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, fontFamily: font, color: colors.text }}>{title}</h2>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: colors.textMuted, fontSize: 22, cursor: "pointer", padding: 0 }}>✕</button>
-        </div>
-        <div style={{ padding: 20 }}>{children}</div>
-      </div>
-    </div>
-  );
-
-  const BrowseScreen = () => (
+  // ── HOME SCREEN ───────────────────────────────────
+  const HomeScreen = () => (
     <div>
-      <Header title="Explore Leagues" subtitle="Find box leagues near you"
-        action={!subscribed ? <Button variant="secondary" onClick={() => setShowSubscribe(true)} style={{ fontSize: 12, padding: "7px 14px" }}>Subscribe</Button> : <Badge color={colors.success}>PRO</Badge>} />
-      <div style={{ padding: "0 20px 12px" }}>
-        <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name or location..."
-          style={{ width: "100%", boxSizing: "border-box", padding: "12px 16px", background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 10, color: colors.text, fontFamily: font, fontSize: 14, outline: "none" }} />
+      {/* Hero */}
+      <div style={{ padding: "48px 20px 20px", background: `linear-gradient(180deg, ${C.primary} 0%, ${C.primaryLight} 100%)`, borderRadius: "0 0 28px 28px", marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <span style={{ fontSize: 22, fontFamily: fonts, fontWeight: 400, color: C.accent, letterSpacing: "-0.02em" }}>boxa</span>
+          <Badge color={C.accent}>Beta</Badge>
+        </div>
+        <h1 style={{ margin: "0 0 6px", fontSize: 34, fontFamily: fonts, fontWeight: 400, color: "#fff", lineHeight: 1.15 }}>Find your<br /><em>league</em></h1>
+        <p style={{ margin: "0 0 18px", fontSize: 14, color: "#ffffff90", lineHeight: 1.5 }}>Join box leagues for tennis, padel and squash. One format. No debate.</p>
+        <div style={{ position: "relative" }}>
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search leagues or locations..." style={{ width: "100%", boxSizing: "border-box", padding: "13px 16px 13px 40px", background: "#ffffff18", border: "1.5px solid #ffffff25", borderRadius: 14, color: "#fff", fontFamily: bodyFont, fontSize: 14, outline: "none", backdropFilter: "blur(8px)" }} />
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, opacity: 0.5 }}>🔍</span>
+        </div>
       </div>
-      <div style={{ padding: "0 20px 16px", display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {[{ id: "all", label: "All" }, { id: "tennis", label: "🎾 Tennis" }, { id: "padel", label: "🏓 Padel" }, { id: "squash", label: "🟡 Squash" }].map((s) => (
-          <button key={s.id} onClick={() => setSportFilter(s.id)} style={{ padding: "7px 14px", borderRadius: 20, border: sportFilter === s.id ? `1.5px solid ${colors.accent}` : `1px solid ${colors.border}`, background: sportFilter === s.id ? colors.accentDim : "transparent", color: sportFilter === s.id ? colors.accent : colors.textMuted, fontFamily: font, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>{s.label}</button>
+
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 8, padding: "0 20px", marginBottom: 24, overflowX: "auto", scrollbarWidth: "none" }}>
+        {[["all", "All", C.primary], ["tennis", "🎾 Tennis", C.tennis], ["padel", "🏓 Padel", C.padel], ["squash", "🟡 Squash", C.squash]].map(([id, label, color]) => (
+          <Pill key={id} active={filter === id} color={color} onClick={() => setFilter(id)}>{label}</Pill>
         ))}
       </div>
-      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: 10, paddingBottom: 90 }}>
-        {filteredLeagues.map((l) => (
-          <Card key={l.id} onClick={() => openLeague(l)}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <Avatar initials={SPORTS[l.sport]} sport={l.sport} />
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: colors.text, fontFamily: font }}>{l.name}</div>
-                  <div style={{ fontSize: 12, color: colors.textMuted, fontFamily: font, marginTop: 2 }}>{l.location}</div>
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-                <Badge color={l.status === "open" ? colors.success : colors.sport[l.sport]}>{l.status === "open" ? "Open" : `${l.totalPlayers} players`}</Badge>
-                <span style={{ fontSize: 11, color: colors.textDim, fontFamily: fontMono }}>{l.boxes} {l.boxes === 1 ? "division" : "divisions"}</span>
-              </div>
-            </div>
-            <p style={{ margin: "8px 0 0", fontSize: 13, color: colors.textMuted, fontFamily: font, lineHeight: 1.45 }}>{l.description}</p>
-          </Card>
-        ))}
-        {filteredLeagues.length === 0 && <div style={{ textAlign: "center", padding: 40, color: colors.textMuted, fontFamily: font }}><div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>No leagues found.</div>}
+
+      {/* Prize Leagues */}
+      {filtered.some(l => l.prize) && (
+        <Section title="Prize leagues" action={<Badge color="#B45309">🏆 Sponsored</Badge>}>
+          <HScroll>{filtered.filter(l => l.prize).map(l => <LeagueCard key={l.id} l={l} />)}</HScroll>
+        </Section>
+      )}
+
+      {/* Starting Soon */}
+      {filtered.some(l => l.starting) && (
+        <Section title="Starting soon">
+          <HScroll>{filtered.filter(l => l.starting).map(l => <LeagueCard key={l.id} l={l} />)}</HScroll>
+        </Section>
+      )}
+
+      {/* Most Active */}
+      <Section title="Most active">
+        <HScroll>{filtered.filter(l => l.featured).map(l => <LeagueCard key={l.id} l={l} />)}</HScroll>
+      </Section>
+
+      {/* All Leagues */}
+      <Section title="All leagues">
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "0 20px" }}>
+          {filtered.map(l => <LeagueCard key={l.id} l={l} wide />)}
+        </div>
+      </Section>
+
+      {/* Format Banner */}
+      <div style={{ margin: "0 20px 24px", padding: "20px", background: C.primary, borderRadius: 16, color: "#fff" }}>
+        <div style={{ fontSize: 18, fontFamily: fonts, fontStyle: "italic", marginBottom: 8 }}>The Boxa Format</div>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          {["2 full sets", "Super tiebreak to 10", "Golden advantage"].map((r, i) => (
+            <span key={i} style={{ padding: "6px 14px", borderRadius: 20, background: "#ffffff15", fontSize: 13, fontWeight: 600, border: "1px solid #ffffff20" }}>{r}</span>
+          ))}
+        </div>
+        <div style={{ marginTop: 12, display: "flex", gap: 16, fontSize: 12, color: "#ffffff80" }}>
+          <span>Win <strong style={{ color: C.accent }}>3pts</strong></span>
+          <span>Loss <strong style={{ color: "#fff" }}>1pt</strong></span>
+          <span>No-show <strong style={{ color: "#ff9999" }}>0pts</strong></span>
+          <span>Set won <strong style={{ color: C.accent }}>+1pt</strong></span>
+        </div>
       </div>
     </div>
   );
 
+  // ── MY LEAGUES ────────────────────────────────────
   const MyLeaguesScreen = () => (
     <div>
-      <Header title="My Leagues" subtitle="Your active box leagues" action={<Button variant="primary" onClick={() => setShowCreateLeague(true)} style={{ fontSize: 12, padding: "7px 14px" }}>+ Create</Button>} />
-      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: 10, paddingBottom: 90 }}>
-        {MOCK_LEAGUES.slice(0, 2).map((l) => (
-          <Card key={l.id} onClick={() => openLeague(l)}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <Avatar initials={SPORTS[l.sport]} sport={l.sport} />
+      <div style={{ padding: "48px 20px 16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h1 style={{ margin: 0, fontSize: 28, fontFamily: fonts, fontWeight: 400 }}>My leagues</h1>
+          <button onClick={() => show("Create league — coming soon")} style={{ padding: "8px 18px", borderRadius: 24, background: C.primary, color: "#fff", border: "none", fontFamily: bodyFont, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Create</button>
+        </div>
+      </div>
+      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+        {LEAGUES.slice(0, 2).map(l => (
+          <div key={l.id} onClick={() => openLeague(l)} style={{ background: C.card, borderRadius: 16, border: `1px solid ${C.cardBorder}`, padding: 16, cursor: "pointer" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+              <span style={{ fontSize: 28 }}>{l.img}</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 15, color: colors.text, fontFamily: font }}>{l.name}</div>
-                <div style={{ fontSize: 12, color: colors.textMuted, fontFamily: font, marginTop: 2 }}>{l.season} · {l.boxes} divisions</div>
+                <div style={{ fontWeight: 700, fontSize: 15 }}>{l.name}</div>
+                <div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>Spring 2026 · {l.boxes} divisions</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: colors.accent, fontFamily: fontMono }}>1st</div>
-                <div style={{ fontSize: 11, color: colors.textMuted }}>Box A</div>
+                <div style={{ fontSize: 24, fontWeight: 800, fontFamily: monoFont, color: C.primary }}>1st</div>
+                <div style={{ fontSize: 11, color: C.textSec }}>Box A</div>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-              <div style={{ flex: 1, height: 4, borderRadius: 2, background: colors.border }}><div style={{ width: "62%", height: "100%", borderRadius: 2, background: `linear-gradient(90deg, ${colors.sport[l.sport]}, ${colors.accent})` }} /></div>
-              <span style={{ fontSize: 11, color: colors.textMuted, fontFamily: fontMono }}>5/7 played</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ flex: 1, height: 5, borderRadius: 3, background: C.cardBorder }}>
+                <div style={{ width: "62%", height: "100%", borderRadius: 3, background: `linear-gradient(90deg, ${sportColor(l.sport)}, ${C.accent})` }} />
+              </div>
+              <span style={{ fontSize: 11, color: C.textDim, fontFamily: monoFont }}>5/7 played</span>
             </div>
-          </Card>
+          </div>
         ))}
-        <Card style={{ border: `1.5px dashed ${colors.border}`, background: "transparent", textAlign: "center", padding: 30 }} onClick={() => setShowCreateLeague(true)}>
-          <div style={{ fontSize: 28, marginBottom: 6 }}>+</div>
-          <div style={{ color: colors.textMuted, fontFamily: font, fontSize: 14, fontWeight: 600 }}>Create a new league</div>
-        </Card>
       </div>
     </div>
   );
 
-  const StandingsTab = () => {
-    if (!currentBox) return null;
-    const hasPromo = currentBox.standings.some(s => s.zone === "promotion");
-    const hasReleg = currentBox.standings.some(s => s.zone === "relegation");
+  // ── LEAGUE DETAIL ─────────────────────────────────
+  const LeagueScreen = () => {
+    if (!league) return null;
+    const boxes = Array.from({ length: league.boxes }, (_, i) => String.fromCharCode(65 + i));
     return (
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <span style={{ fontSize: 13, color: colors.textMuted, fontFamily: font }}>{currentBox.label} · Spring 2026</span>
-          <Button variant="primary" onClick={() => setShowScoreEntry(true)} style={{ fontSize: 12, padding: "7px 14px" }}>+ Add Score</Button>
+        {/* Header */}
+        <div style={{ padding: "48px 20px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+          <button onClick={() => setScreen("leagues")} style={{ background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 18, color: C.textSec }}>←</button>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ margin: 0, fontSize: 20, fontFamily: fonts, fontWeight: 400, lineHeight: 1.2 }}>{league.name}</h1>
+            <p style={{ margin: "2px 0 0", fontSize: 12, color: C.textSec }}>{league.img} {sportLabel[league.sport]} · {league.location}</p>
+          </div>
         </div>
-        {(hasPromo || hasReleg) && (
-          <div style={{ display: "flex", gap: 16, marginBottom: 12, fontSize: 11, fontFamily: font }}>
-            {hasPromo && <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: colors.promotion }} /><span style={{ color: colors.promotion, fontWeight: 600 }}>Promotion</span></div>}
-            {hasReleg && <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: colors.relegation }} /><span style={{ color: colors.relegation, fontWeight: 600 }}>Relegation</span></div>}
+
+        {/* Box switcher */}
+        {league.boxes > 1 && (
+          <div style={{ display: "flex", gap: 6, padding: "0 20px", marginBottom: 14 }}>
+            {boxes.map((b, i) => (
+              <button key={i} onClick={() => setBox(i)} style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: box === i ? `2px solid ${C.primary}` : `1.5px solid ${C.cardBorder}`, background: box === i ? C.primary + "08" : C.card, color: box === i ? C.primary : C.textSec, fontFamily: bodyFont, fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>
+                Box {b}<br /><span style={{ fontSize: 10, fontWeight: 500, opacity: 0.6 }}>Division {i + 1}</span>
+              </button>
+            ))}
           </div>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 36px 36px 36px 44px", gap: 4, padding: "8px 12px 8px 16px", fontSize: 11, fontWeight: 700, color: colors.textDim, fontFamily: fontMono, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", margin: "0 20px", background: C.card, borderRadius: 12, border: `1px solid ${C.cardBorder}`, overflow: "hidden", marginBottom: 16 }}>
+          {["table", "results", "players"].map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "11px 0", background: tab === t ? C.primary : "transparent", color: tab === t ? "#fff" : C.textSec, border: "none", fontFamily: bodyFont, fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "all 0.2s", textTransform: "capitalize" }}>{t}</button>
+          ))}
+        </div>
+
+        <div style={{ padding: "0 20px" }}>
+          {tab === "table" && <TableTab />}
+          {tab === "results" && <ResultsTab />}
+          {tab === "players" && <PlayersTab />}
+        </div>
+      </div>
+    );
+  };
+
+  const TableTab = () => (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ display: "flex", gap: 12, fontSize: 11, fontFamily: bodyFont }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: C.promo, display: "inline-block" }} /> Promotion</span>
+          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: C.releg, display: "inline-block" }} /> Relegation</span>
+        </div>
+        <button onClick={() => show("Score entry — coming soon")} style={{ padding: "7px 16px", borderRadius: 20, background: C.primary, color: "#fff", border: "none", fontSize: 12, fontWeight: 700, fontFamily: bodyFont, cursor: "pointer" }}>+ Add Score</button>
+      </div>
+      <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.cardBorder}`, overflow: "hidden" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "30px 1fr 32px 32px 32px 40px", gap: 2, padding: "10px 14px", fontSize: 10, fontWeight: 700, color: C.textDim, fontFamily: monoFont, textTransform: "uppercase", borderBottom: `1px solid ${C.cardBorder}` }}>
           <span>#</span><span>Player</span><span>P</span><span>W</span><span>L</span><span style={{ textAlign: "right" }}>Pts</span>
         </div>
-        {currentBox.standings.map((p, i) => (
-          <div key={i} style={{ position: "relative", display: "grid", gridTemplateColumns: "32px 1fr 36px 36px 36px 44px", gap: 4, padding: "10px 12px 10px 16px", borderRadius: 10, background: p.name === "You" ? colors.accentDim : i % 2 === 0 ? "transparent" : colors.card + "60", alignItems: "center", fontSize: 13, fontFamily: font, color: colors.text, border: p.name === "You" ? `1px solid ${colors.accent}30` : "1px solid transparent", overflow: "hidden" }}>
-            <ZoneIndicator zone={p.zone} />
-            <span style={{ fontFamily: fontMono, fontWeight: 700, color: i < 3 ? colors.accent : colors.textMuted, fontSize: 14 }}>{p.rank}</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontWeight: p.name === "You" ? 800 : 500, color: p.name === "You" ? colors.accent : colors.text }}>{p.name}</span>
-              {p.zone === "promotion" && <span style={{ fontSize: 10 }}>▲</span>}
-              {p.zone === "relegation" && <span style={{ fontSize: 10, color: colors.relegation }}>▼</span>}
-            </div>
-            <span style={{ color: colors.textMuted, fontFamily: fontMono }}>{p.played}</span>
-            <span style={{ color: colors.success, fontFamily: fontMono }}>{p.won}</span>
-            <span style={{ color: colors.danger, fontFamily: fontMono }}>{p.lost}</span>
-            <span style={{ textAlign: "right", fontWeight: 800, fontFamily: fontMono, fontSize: 15, color: p.name === "You" ? colors.accent : colors.text }}>{p.points}</span>
+        {STANDINGS.map((s, i) => (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "30px 1fr 32px 32px 32px 40px", gap: 2, padding: "11px 14px", alignItems: "center", fontSize: 13, background: s.name === "You" ? C.primary + "06" : "transparent", borderBottom: i < STANDINGS.length - 1 ? `1px solid ${C.cardBorder}50` : "none", position: "relative" }}>
+            {s.zone && <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: s.zone === "releg" ? C.releg : C.promo, borderRadius: "0 2px 2px 0" }} />}
+            <span style={{ fontFamily: monoFont, fontWeight: 700, fontSize: 14, color: i < 3 ? C.primary : C.textDim }}>{s.rank}</span>
+            <span style={{ fontWeight: s.name === "You" ? 800 : 500, color: s.name === "You" ? C.primary : C.text }}>
+              {s.name} {s.zone === "releg" && <span style={{ color: C.releg, fontSize: 10 }}>▼</span>}
+            </span>
+            <span style={{ fontFamily: monoFont, color: C.textDim, fontSize: 12 }}>{s.p}</span>
+            <span style={{ fontFamily: monoFont, color: C.promo, fontSize: 12 }}>{s.w}</span>
+            <span style={{ fontFamily: monoFont, color: C.releg, fontSize: 12 }}>{s.l}</span>
+            <span style={{ textAlign: "right", fontWeight: 800, fontFamily: monoFont, fontSize: 15, color: s.name === "You" ? C.primary : C.text }}>{s.pts}</span>
           </div>
         ))}
-        <div style={{ marginTop: 16, padding: 14, background: colors.card, borderRadius: 10, border: `1px solid ${colors.border}` }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, fontFamily: font, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>The Format</div>
-          <div style={{ fontSize: 13, color: colors.textMuted, fontFamily: font, lineHeight: 1.7 }}>
-            <div style={{ color: colors.text, fontWeight: 600, marginBottom: 6 }}>2 full sets · Super tiebreak to 10 · Golden advantage</div>
-            {[["Match win", "3 pts", colors.accent], ["Match loss", "1 pt", colors.text], ["No-show", "0 pts", colors.danger], ["Each set won", "+1 pt", colors.success]].map(([label, pts, c], i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: i < 3 ? `1px solid ${colors.border}` : "none" }}>
-                <span>{label}</span><span style={{ fontFamily: fontMono, color: c, fontWeight: 700 }}>{pts}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const ResultsTab = () => {
-    if (!currentBox) return null;
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {currentBox.results.map((r) => (
-          <Card key={r.id}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontWeight: r.winner === r.p1 ? 800 : 400, color: r.winner === r.p1 ? colors.accent : colors.text, fontSize: 14, fontFamily: font }}>{r.p1}</span>
-                  <span style={{ color: colors.textDim, fontSize: 12 }}>vs</span>
-                  <span style={{ fontWeight: r.winner === r.p2 ? 800 : 400, color: r.winner === r.p2 ? colors.accent : colors.text, fontSize: 14, fontFamily: font }}>{r.p2}</span>
-                </div>
-                <div style={{ fontSize: 12, color: colors.textMuted, fontFamily: font, marginTop: 4 }}>{r.date}</div>
-              </div>
-              <div style={{ fontFamily: fontMono, fontSize: 14, fontWeight: 700, color: colors.text }}>{r.score}</div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  };
-
-  const PlayersTab = () => {
-    if (!currentBox) return null;
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ fontSize: 13, color: colors.textMuted, fontFamily: font, marginBottom: 4 }}>Tap a player's number to message them on WhatsApp.</div>
-        {currentBox.players.map((p, i) => (
-          <Card key={i}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <Avatar initials={p.avatar} size={42} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 14, color: colors.text, fontFamily: font }}>{p.name}</div>
-                <div style={{ fontSize: 12, color: colors.textMuted, fontFamily: font, marginTop: 2 }}>Active {p.lastActive}</div>
-              </div>
-              <a href={`https://wa.me/${p.phone.replace(/\s/g, "")}`} target="_blank" rel="noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", borderRadius: 8, background: "#25D36620", color: "#25D366", fontFamily: fontMono, fontSize: 12, fontWeight: 600, textDecoration: "none", border: "1px solid #25D36630", whiteSpace: "nowrap" }}
-                onClick={(e) => e.stopPropagation()}>
-                <span style={{ fontSize: 14 }}>💬</span>{p.phone}
-              </a>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  };
-
-  const LeagueScreen = () => {
-    if (!selectedLeague) return null;
-    const l = selectedLeague;
-    return (
-      <div>
-        <Header title={l.name} subtitle={`${SPORTS[l.sport]} ${l.sport.charAt(0).toUpperCase() + l.sport.slice(1)} · ${l.location}`}
-          back={() => setScreen("my-leagues")}
-          action={<button onClick={() => setShowSeasonInfo(true)} style={{ background: "none", border: `1px solid ${colors.border}`, borderRadius: 8, padding: "6px 10px", color: colors.textMuted, fontSize: 12, fontFamily: font, fontWeight: 600, cursor: "pointer" }}>ℹ️ Rules</button>} />
-        {currentBoxes.length > 1 && (
-          <div style={{ padding: "0 20px 12px" }}>
-            <div style={{ display: "flex", background: colors.card, borderRadius: 12, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
-              {currentBoxes.map((box, idx) => (
-                <button key={idx} onClick={() => setSelectedBoxIdx(idx)} style={{ flex: 1, padding: "10px 8px", background: selectedBoxIdx === idx ? colors.accentDim : "transparent", border: "none", borderRight: idx < currentBoxes.length - 1 ? `1px solid ${colors.border}` : "none", color: selectedBoxIdx === idx ? colors.accent : colors.textMuted, fontFamily: font, fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-                  <span>{box.name}</span>
-                  <span style={{ fontSize: 10, fontWeight: 500, opacity: 0.7 }}>{box.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        {currentBox && currentBox.standings.some(s => s.name === "You") && (
-          <div style={{ margin: "0 20px 12px", padding: "10px 14px", background: colors.accentDim, borderRadius: 10, border: `1px solid ${colors.accent}30`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ fontFamily: font, fontSize: 13, fontWeight: 600, color: colors.accent }}>Your position in {currentBox.name}</div>
-            <div style={{ fontFamily: fontMono, fontSize: 18, fontWeight: 800, color: colors.accent }}>#{currentBox.standings.find(s => s.name === "You")?.rank}</div>
-          </div>
-        )}
-        <div style={{ display: "flex", padding: "0 20px", borderBottom: `1px solid ${colors.border}`, marginBottom: 16 }}>
-          {[{ id: "standings", label: "Table" }, { id: "results", label: "Results" }, { id: "players", label: "Players" }].map((t) => (
-            <button key={t.id} onClick={() => setLeagueTab(t.id)} style={{ flex: 1, padding: "10px 0", background: "none", border: "none", borderBottom: leagueTab === t.id ? `2px solid ${colors.accent}` : "2px solid transparent", color: leagueTab === t.id ? colors.accent : colors.textMuted, fontFamily: font, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{t.label}</button>
-          ))}
-        </div>
-        <div style={{ padding: "0 20px", paddingBottom: 90 }}>
-          {leagueTab === "standings" && <StandingsTab />}
-          {leagueTab === "results" && <ResultsTab />}
-          {leagueTab === "players" && <PlayersTab />}
-        </div>
-      </div>
-    );
-  };
-
-  const ProfileScreen = () => (
-    <div>
-      <Header title="Profile" />
-      <div style={{ padding: "0 20px", paddingBottom: 90 }}>
-        <Card style={{ marginBottom: 16, textAlign: "center", padding: 24 }}>
-          <div style={{ display: "flex", justifyContent: "center" }}><Avatar initials="TD" size={64} /></div>
-          <div style={{ marginTop: 12, fontWeight: 800, fontSize: 20, color: colors.text, fontFamily: font }}>Teddy</div>
-          <div style={{ fontSize: 13, color: colors.textMuted, fontFamily: font, marginTop: 4 }}>Member since March 2026</div>
-          <div style={{ display: "flex", justifyContent: "center", gap: 20, marginTop: 16 }}>
-            {[{ val: "2", label: "Leagues" }, { val: "8", label: "Wins", color: colors.success }, { val: "14", label: "Played" }].map((s, i) => (
-              <div key={i} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 22, fontWeight: 800, fontFamily: fontMono, color: s.color || colors.accent }}>{s.val}</div>
-                <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: font }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </Card>
-        <Card style={{ marginBottom: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 14, color: colors.text, fontFamily: font }}>Subscription</div>
-              <div style={{ fontSize: 13, color: colors.textMuted, fontFamily: font, marginTop: 2 }}>{subscribed ? "Pro Member · $2/month" : "Free tier"}</div>
-            </div>
-            {subscribed ? <Badge color={colors.success}>Active</Badge> : <Button variant="primary" onClick={() => setShowSubscribe(true)} style={{ fontSize: 12, padding: "7px 14px" }}>Upgrade</Button>}
-          </div>
-        </Card>
-        {["Edit Profile", "Notification Preferences", "Help & Support"].map((item, i) => (
-          <div key={i} onClick={() => notify(`${item} — coming soon`)} style={{ padding: "14px 0", borderBottom: `1px solid ${colors.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-            <span style={{ fontFamily: font, fontSize: 14, color: colors.text }}>{item}</span>
-            <span style={{ color: colors.textDim }}>→</span>
-          </div>
-        ))}
-        <div style={{ marginTop: 24, textAlign: "center" }}><Button variant="danger" onClick={() => notify("Logged out")}>Log Out</Button></div>
       </div>
     </div>
   );
 
-  const ScoreEntryModal = () => {
-    const [opponent, setOpponent] = useState("");
-    const [set1, setSet1] = useState({ you: "", them: "" });
-    const [set2, setSet2] = useState({ you: "", them: "" });
-    const [tb, setTb] = useState({ you: "", them: "" });
-    const opponents = currentBox ? currentBox.players.filter(p => p.name !== "You") : [];
-    const s1Done = set1.you !== "" && set1.them !== "";
-    const s2Done = set2.you !== "" && set2.them !== "";
-    const set1Winner = s1Done ? (parseInt(set1.you) > parseInt(set1.them) ? "you" : "them") : null;
-    const set2Winner = s2Done ? (parseInt(set2.you) > parseInt(set2.them) ? "you" : "them") : null;
-    const needsTiebreak = s1Done && s2Done && set1Winner !== set2Winner;
-    const straightSets = s1Done && s2Done && set1Winner === set2Winner;
-    const formatScore = () => { let s = `${set1.you}-${set1.them}, ${set2.you}-${set2.them}`; if (needsTiebreak && tb.you && tb.them) s += `, [${tb.you}-${tb.them}]`; return s; };
-
-    return (
-      <Modal title="Submit Score" onClose={() => setShowScoreEntry(false)}>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, fontFamily: font, display: "block", marginBottom: 6, textTransform: "uppercase" }}>Opponent</label>
-          <select value={opponent} onChange={(e) => setOpponent(e.target.value)} style={{ width: "100%", padding: "10px 14px", background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 10, color: colors.text, fontFamily: font, fontSize: 14 }}>
-            <option value="">Select opponent</option>
-            {opponents.map((p, i) => <option key={i} value={p.name}>{p.name}</option>)}
-          </select>
-        </div>
-        {[["Set 1", set1, setSet1], ["Set 2", set2, setSet2]].map(([label, val, setter]) => (
-          <div key={label} style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, fontFamily: font, display: "block", marginBottom: 8, textTransform: "uppercase" }}>{label}</label>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <input value={val.you} onChange={(e) => setter({ ...val, you: e.target.value })} placeholder="0" maxLength={1} style={{ flex: 1, padding: "12px", background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 10, color: colors.text, fontFamily: fontMono, fontSize: 22, textAlign: "center", fontWeight: 700 }} />
-              <span style={{ color: colors.textDim, fontWeight: 700, fontSize: 18 }}>–</span>
-              <input value={val.them} onChange={(e) => setter({ ...val, them: e.target.value })} placeholder="0" maxLength={1} style={{ flex: 1, padding: "12px", background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 10, color: colors.text, fontFamily: fontMono, fontSize: 22, textAlign: "center", fontWeight: 700 }} />
+  const ResultsTab = () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {RESULTS.map((r, i) => (
+        <div key={i} style={{ background: C.card, borderRadius: 12, border: `1px solid ${C.cardBorder}`, padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}>
+              <span style={{ fontWeight: r.winner === r.p1 ? 800 : 400, color: r.winner === r.p1 ? C.primary : C.text }}>{r.p1}</span>
+              <span style={{ color: C.textDim, fontSize: 11 }}>vs</span>
+              <span style={{ fontWeight: r.winner === r.p2 ? 800 : 400, color: r.winner === r.p2 ? C.primary : C.text }}>{r.p2}</span>
             </div>
+            <div style={{ fontSize: 11, color: C.textDim, marginTop: 3 }}>{r.date}</div>
           </div>
-        ))}
-        {needsTiebreak && (
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 12, fontWeight: 700, color: colors.warning, fontFamily: font, display: "block", marginBottom: 8, textTransform: "uppercase" }}>⚡ Super Tiebreak (to 10)</label>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <input value={tb.you} onChange={(e) => setTb({ ...tb, you: e.target.value })} placeholder="0" maxLength={2} style={{ flex: 1, padding: "12px", background: colors.warning + "10", border: `1px solid ${colors.warning}30`, borderRadius: 10, color: colors.warning, fontFamily: fontMono, fontSize: 22, textAlign: "center", fontWeight: 700 }} />
-              <span style={{ color: colors.textDim, fontWeight: 700, fontSize: 18 }}>–</span>
-              <input value={tb.them} onChange={(e) => setTb({ ...tb, them: e.target.value })} placeholder="0" maxLength={2} style={{ flex: 1, padding: "12px", background: colors.warning + "10", border: `1px solid ${colors.warning}30`, borderRadius: 10, color: colors.warning, fontFamily: fontMono, fontSize: 22, textAlign: "center", fontWeight: 700 }} />
-            </div>
-          </div>
-        )}
-        {straightSets && <div style={{ padding: "10px 12px", background: colors.success + "10", borderRadius: 10, border: `1px solid ${colors.success}20`, marginBottom: 14, fontSize: 13, color: colors.success, fontFamily: font, fontWeight: 600 }}>✓ Straight sets — no tiebreak needed</div>}
-        {s1Done && s2Done && <div style={{ padding: "10px 12px", background: colors.card, borderRadius: 10, border: `1px solid ${colors.border}`, marginBottom: 14, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: colors.textMuted, fontFamily: font }}>Score</span><span style={{ fontFamily: fontMono, fontSize: 15, fontWeight: 700, color: colors.text }}>{formatScore()}</span></div>}
-        <div style={{ display: "flex", gap: 10 }}>
-          <Button variant="ghost" onClick={() => setShowScoreEntry(false)} style={{ flex: 1 }}>Cancel</Button>
-          <Button variant="primary" disabled={!opponent || !s2Done || (needsTiebreak && (!tb.you || !tb.them))} onClick={() => { setShowScoreEntry(false); notify("Score submitted!"); }} style={{ flex: 2 }}>Submit</Button>
-        </div>
-      </Modal>
-    );
-  };
-
-  const CreateLeagueModal = () => {
-    const [form, setForm] = useState({ name: "", sport: "tennis", location: "", numBoxes: "2", playersPerBox: "8", description: "" });
-    const update = (k, v) => setForm({ ...form, [k]: v });
-    return (
-      <Modal title="Create League" onClose={() => setShowCreateLeague(false)}>
-        {[{ key: "name", label: "League Name", placeholder: "e.g. Clapham Tennis Box League" }, { key: "location", label: "Location", placeholder: "e.g. Clapham, London" }, { key: "description", label: "Description", placeholder: "Tell players what to expect...", multiline: true }].map((f) => (
-          <div key={f.key} style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, fontFamily: font, display: "block", marginBottom: 6, textTransform: "uppercase" }}>{f.label}</label>
-            {f.multiline ? <textarea value={form[f.key]} onChange={(e) => update(f.key, e.target.value)} placeholder={f.placeholder} rows={3} style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 10, color: colors.text, fontFamily: font, fontSize: 14, resize: "vertical" }} /> : <input value={form[f.key]} onChange={(e) => update(f.key, e.target.value)} placeholder={f.placeholder} style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 10, color: colors.text, fontFamily: font, fontSize: 14 }} />}
-          </div>
-        ))}
-        <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-          {[{ key: "sport", label: "Sport", opts: [["tennis", "🎾 Tennis"], ["padel", "🏓 Padel"], ["squash", "🟡 Squash"]] }, { key: "numBoxes", label: "Divisions", opts: [1,2,3,4,5].map(n => [n, `${n} ${n===1?"division":"divisions"}`]) }].map(({ key, label, opts }) => (
-            <div key={key} style={{ flex: 1 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, fontFamily: font, display: "block", marginBottom: 6, textTransform: "uppercase" }}>{label}</label>
-              <select value={form[key]} onChange={(e) => update(key, e.target.value)} style={{ width: "100%", padding: "10px 14px", background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 10, color: colors.text, fontFamily: font, fontSize: 14 }}>
-                {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            </div>
-          ))}
-        </div>
-        <div style={{ padding: "10px 12px", background: colors.accentDim, borderRadius: 10, border: `1px solid ${colors.accent}20`, marginBottom: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: colors.accent, fontFamily: font, marginBottom: 4 }}>Standard Format</div>
-          <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: font }}>2 sets · Super tiebreak · Golden advantage · Top 2 promoted · Bottom 2 relegated</div>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <Button variant="ghost" onClick={() => setShowCreateLeague(false)} style={{ flex: 1 }}>Cancel</Button>
-          <Button variant="primary" onClick={() => { setShowCreateLeague(false); notify("League created!"); }} style={{ flex: 2 }}>Create League</Button>
-        </div>
-      </Modal>
-    );
-  };
-
-  const SeasonInfoModal = () => (
-    <Modal title="The BoxLeague Format" onClose={() => setShowSeasonInfo(false)}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ padding: "14px 16px", background: colors.accentDim, borderRadius: 12, border: `1px solid ${colors.accent}30` }}>
-          <div style={{ fontSize: 16, fontWeight: 800, color: colors.accent, fontFamily: font, marginBottom: 6 }}>Every match. Same rules. No debate.</div>
-          <div style={{ fontSize: 13, color: colors.text, fontFamily: font, lineHeight: 1.6 }}>2 full sets · Super tiebreak if split · Golden advantage at deuce</div>
-        </div>
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: colors.text, fontFamily: font, marginBottom: 8 }}>Points</div>
-          {[["Match win", "3 pts", colors.accent], ["Match loss", "1 pt", colors.text], ["No-show", "0 pts", colors.danger], ["Each set won", "+1 pt", colors.success]].map(([label, pts, c], i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i < 3 ? `1px solid ${colors.border}` : "none", fontSize: 13, fontFamily: font, color: colors.textMuted }}>
-              <span>{label}</span><span style={{ fontFamily: fontMono, color: c, fontWeight: 700 }}>{pts}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Modal>
-  );
-
-  const SubscribeModal = () => (
-    <Modal title="Go Pro" onClose={() => setShowSubscribe(false)}>
-      <div style={{ textAlign: "center", padding: "10px 0 20px" }}>
-        <div style={{ fontSize: 48, fontWeight: 900, fontFamily: fontMono, color: colors.accent }}>$2</div>
-        <div style={{ fontSize: 14, color: colors.textMuted, fontFamily: font }}>per month</div>
-      </div>
-      {[{ icon: "✦", text: "Join unlimited leagues" }, { icon: "📊", text: "Full stats & history" }, { icon: "👥", text: "Player contact details" }, { icon: "🏆", text: "Create multi-division leagues" }, { icon: "🔔", text: "Match reminders" }].map((f, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: colors.card, borderRadius: 10, border: `1px solid ${colors.border}`, marginBottom: 8 }}>
-          <span style={{ fontSize: 18 }}>{f.icon}</span><span style={{ fontFamily: font, fontSize: 14, color: colors.text }}>{f.text}</span>
+          <span style={{ fontFamily: monoFont, fontSize: 13, fontWeight: 700, color: C.text }}>{r.score}</span>
         </div>
       ))}
-      <Button variant="primary" onClick={() => { setSubscribed(true); setShowSubscribe(false); notify("Welcome to Pro! 🎉"); }} style={{ width: "100%", padding: "14px", fontSize: 16, marginTop: 16 }}>Subscribe — $2/month</Button>
-    </Modal>
+    </div>
   );
 
+  const PlayersTab = () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <p style={{ fontSize: 13, color: C.textSec, margin: "0 0 4px" }}>Tap to message on WhatsApp and arrange a match.</p>
+      {PLAYERS.map((p, i) => (
+        <div key={i} style={{ background: C.card, borderRadius: 12, border: `1px solid ${C.cardBorder}`, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+          <Avatar initials={p.initials} color={C.primary} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
+            <div style={{ fontSize: 11, color: C.textDim, marginTop: 1 }}>Active {p.active}</div>
+          </div>
+          <a href={`https://wa.me/${p.phone.replace(/\s/g, "")}`} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 5, padding: "8px 12px", borderRadius: 10, background: C.whatsapp + "12", color: C.whatsapp, fontFamily: monoFont, fontSize: 11, fontWeight: 600, textDecoration: "none", border: `1px solid ${C.whatsapp}25`, whiteSpace: "nowrap" }} onClick={e => e.stopPropagation()}>
+            💬 {p.phone}
+          </a>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ── PROFILE ───────────────────────────────────────
+  const ProfileScreen = () => (
+    <div>
+      <div style={{ padding: "48px 20px 20px" }}>
+        <h1 style={{ margin: 0, fontSize: 28, fontFamily: fonts, fontWeight: 400 }}>Profile</h1>
+      </div>
+      <div style={{ margin: "0 20px", background: C.card, borderRadius: 16, border: `1px solid ${C.cardBorder}`, padding: 24, textAlign: "center", marginBottom: 16 }}>
+        <Avatar initials="TD" size={64} color={C.primary} />
+        <div style={{ marginTop: 10, fontWeight: 800, fontSize: 20 }}>Teddy</div>
+        <div style={{ fontSize: 13, color: C.textSec, marginTop: 2 }}>Member since March 2026</div>
+        <div style={{ display: "flex", justifyContent: "center", gap: 28, marginTop: 18 }}>
+          {["2", "8", "14"].map((v, i) => (
+            <div key={i} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 24, fontWeight: 800, fontFamily: monoFont, color: [C.primary, C.promo, C.text][i] }}>{v}</div>
+              <div style={{ fontSize: 11, color: C.textSec }}>{["Leagues", "Wins", "Played"][i]}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Promo history */}
+      <div style={{ margin: "0 20px", background: C.card, borderRadius: 16, border: `1px solid ${C.cardBorder}`, padding: 16, marginBottom: 16 }}>
+        <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>Promotion History</div>
+        {[{ s: "Winter 2025", from: "Box B", to: "Box A", type: "promo" }, { s: "Autumn 2025", from: "Box C", to: "Box B", type: "promo" }].map((h, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: h.type === "promo" ? C.promo + "08" : C.releg + "08", borderRadius: 10, border: `1px solid ${h.type === "promo" ? C.promo : C.releg}18`, marginBottom: i < 1 ? 6 : 0 }}>
+            <span style={{ color: h.type === "promo" ? C.promo : C.releg }}>▲</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>{h.from} → {h.to}</div>
+              <div style={{ fontSize: 11, color: C.textSec }}>{h.s}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Subscription */}
+      <div style={{ margin: "0 20px", background: C.primary, borderRadius: 16, padding: 20, color: "#fff" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>Boxa Pro</div>
+            <div style={{ fontSize: 13, color: "#ffffff80", marginTop: 2 }}>$4/mo annual · $5/mo rolling</div>
+          </div>
+          <span style={{ padding: "5px 14px", borderRadius: 20, background: C.accent, color: C.primary, fontSize: 12, fontWeight: 800 }}>Active</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── Render ────────────────────────────────────────
   return (
-    <div style={{ background: colors.bg, minHeight: "100vh", maxWidth: 480, margin: "0 auto", fontFamily: font, position: "relative" }}>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-      {notification && (
-        <div style={{ position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)", zIndex: 300, background: colors.accent, color: colors.accentText, padding: "10px 24px", borderRadius: 12, fontFamily: font, fontSize: 14, fontWeight: 700 }}>{notification}</div>
+    <div style={base}>
+      <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+      {toast && (
+        <div style={{ position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)", zIndex: 300, background: C.primary, color: "#fff", padding: "10px 24px", borderRadius: 14, fontFamily: bodyFont, fontSize: 14, fontWeight: 700, boxShadow: "0 8px 30px rgba(0,0,0,0.15)", animation: "slideDown 0.2s" }}>{toast}</div>
       )}
-      {screen === "browse" && <BrowseScreen />}
-      {screen === "my-leagues" && <MyLeaguesScreen />}
+      {screen === "home" && <HomeScreen />}
+      {screen === "leagues" && <MyLeaguesScreen />}
       {screen === "league" && <LeagueScreen />}
       {screen === "profile" && <ProfileScreen />}
-      {showScoreEntry && <ScoreEntryModal />}
-      {showCreateLeague && <CreateLeagueModal />}
-      {showSubscribe && <SubscribeModal />}
-      {showSeasonInfo && <SeasonInfoModal />}
       <Nav />
-      <style>{`* { -webkit-tap-highlight-color: transparent; } input::placeholder, textarea::placeholder { color: ${colors.textDim}; } ::-webkit-scrollbar { width: 0; }`}</style>
+      <style>{`
+        * { -webkit-tap-highlight-color: transparent; }
+        input::placeholder { color: #ffffff50; }
+        ::-webkit-scrollbar { display: none; }
+        @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+      `}</style>
     </div>
   );
 }
