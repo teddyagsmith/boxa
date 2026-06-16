@@ -76,7 +76,7 @@ export default function Boxa() {
   const bodyFont = `'Inter', 'Segoe UI', system-ui, sans-serif`;
   const monoFont = `'Space Mono', 'Courier New', monospace`;
 
-  const base = { background: C.bg, minHeight: "100vh", maxWidth: 480, margin: "0 auto", fontFamily: bodyFont, color: C.text, position: "relative", paddingBottom: 72 };
+  const base = { background: C.bg, minHeight: "100vh", maxWidth: 1200, margin: "0 auto", fontFamily: bodyFont, color: C.text, position: "relative", paddingBottom: 72 };
 
   // ── Small Components ──────────────────────────────
   const Pill = ({ active, children, onClick, color }) => (
@@ -193,7 +193,7 @@ export default function Boxa() {
 
   // ── Nav ────────────────────────────────────────────
   const Nav = () => (
-    <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: C.card, borderTop: `1px solid ${C.cardBorder}`, display: "flex", padding: "8px 0 env(safe-area-inset-bottom, 10px)", zIndex: 100 }}>
+    <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 1200, background: C.card, borderTop: `1px solid ${C.cardBorder}`, display: "flex", padding: "8px 0 env(safe-area-inset-bottom, 10px)", zIndex: 100 }}>
       {[["home", "◉", "Explore"], ["leagues", "⬡", "My Leagues"], ["profile", "◐", "Profile"]].map(([id, icon, label]) => (
         <button key={id} onClick={() => { setScreen(id); setLeague(null); }} style={{ flex: 1, background: "none", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "4px 0", cursor: "pointer", color: (screen === id || (screen === "league" && id === "leagues")) ? C.primary : C.textDim, fontFamily: bodyFont, fontSize: 10, fontWeight: 600, transition: "color 0.2s" }}>
           <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>{label}
@@ -475,6 +475,19 @@ export default function Boxa() {
         input::placeholder { color: #ffffff50; }
         ::-webkit-scrollbar { display: none; }
         @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        
+        /* Desktop responsive */
+        @media (min-width: 768px) {
+          .league-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; overflow-x: visible !important; padding: 0 !important; }
+          .league-grid > div { width: 100% !important; }
+          .section-padding { padding: 0 40px !important; }
+          .hero-padding { padding: 48px 40px 20px !important; }
+        }
+        @media (min-width: 1024px) {
+          .section-padding { padding: 0 60px !important; }
+          .hero-padding { padding: 48px 60px 20px !important; }
+          .league-grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
+        }
       `}</style>
     </div>
   );
